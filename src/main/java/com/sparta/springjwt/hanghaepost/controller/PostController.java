@@ -2,9 +2,12 @@ package com.sparta.springjwt.hanghaepost.controller;
 
 import com.sparta.springjwt.hanghaepost.dto.PostRequestsDto;
 import com.sparta.springjwt.hanghaepost.dto.PostResponseDto;
+import com.sparta.springjwt.hanghaepost.dto.ResponseDto;
 import com.sparta.springjwt.hanghaepost.entity.Post;
 import com.sparta.springjwt.hanghaepost.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,13 +27,21 @@ public class PostController {
         return postService.getPosts();
     }
 
+    @GetMapping("/api/post/{id}")
+    public ResponseEntity<PostResponseDto> getpost(@PathVariable Long id){
+        PostResponseDto postResponseDto = postService.getpost(id);
+        return ResponseEntity.status(HttpStatus.OK).body(postResponseDto);
+    }
+
     @PutMapping("/api/posts/{id}")
-    public Long updatePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
-        return postService.update(id, requestDto, request);
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
+        PostResponseDto postResponseDto = postService.update(id, requestDto, request);
+        return ResponseEntity.status(HttpStatus.OK).body(postResponseDto);
     }
 
     @DeleteMapping("/api/posts/{id}")
-    public Long deletePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
-        return postService.deletePost(id, requestDto, request);
+    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
+        postService.deletePost(id, requestDto, request);
+        return ResponseEntity.ok(new ResponseDto(200,"게시글 삭제 성공"));
     }
 }

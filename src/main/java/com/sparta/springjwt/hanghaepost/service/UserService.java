@@ -6,7 +6,6 @@ import com.sparta.springjwt.hanghaepost.entity.User;
 import com.sparta.springjwt.hanghaepost.jwt.JwtUtil;
 import com.sparta.springjwt.hanghaepost.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

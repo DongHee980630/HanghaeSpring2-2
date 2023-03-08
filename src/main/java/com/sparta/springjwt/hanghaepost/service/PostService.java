@@ -48,13 +48,12 @@ public class PostService {
             throw new IllegalArgumentException("토큰없음");
         }
     }
-    @Transactional
     public List<Post> getPosts() {
         return postRepository.findAllByOrderByModifiedAtDesc();
     }
 
     @Transactional
-    public Long update(Long id, PostRequestsDto requestsDto, HttpServletRequest request) {
+    public PostResponseDto update(Long id, PostRequestsDto requestsDto, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
@@ -75,7 +74,7 @@ public class PostService {
                     () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
             );
             post.update(requestsDto);
-            return post.getId();
+            return new PostResponseDto(post);
         }else {
             throw new IllegalArgumentException("토큰없음");
         }
@@ -105,5 +104,10 @@ public class PostService {
         }else {
             throw new IllegalArgumentException("토큰없음");
         }
+    }
+
+    public PostResponseDto getpost(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("게시글이 없습니다." + id));
+        return new PostResponseDto(post);
     }
 }
