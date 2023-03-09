@@ -23,7 +23,7 @@ public class PostController {
         return postService.createPost(requestsDto, request);
     }
     @GetMapping("/api/posts")
-    public List<Post> getPosts(){
+    public List<PostResponseDto> getPosts(){
         return postService.getPosts();
     }
 
@@ -40,8 +40,8 @@ public class PostController {
     }
 
     @DeleteMapping("/api/posts/{id}")
-    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
-        postService.deletePost(id, requestDto, request);
-        return ResponseEntity.ok(new ResponseDto(200,"게시글 삭제 성공"));
+    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long id, HttpServletRequest request){
+        postService.deletePost(id, request);
+        return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "게시글 삭제 성공"));
     }
 }

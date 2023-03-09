@@ -41,15 +41,20 @@ public class PostService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
             //요청받은 DTO로 db에 저장할 객체 만들기
-            Post post = postRepository.saveAndFlush(new Post(requestsDto, user.getId()));
+            Post post = postRepository.saveAndFlush(new Post(requestsDto,user));
 
             return new PostResponseDto(post);
         }else {
             throw new IllegalArgumentException("토큰없음");
         }
     }
-    public List<Post> getPosts() {
+    public List<PostResponseDto> getPosts() {
         return postRepository.findAllByOrderByModifiedAtDesc();
+    }
+
+    public PostResponseDto getpost(Long id) {
+        Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("게시글이 없습니다." + id));
+        return new PostResponseDto(post);
     }
 
     @Transactional
@@ -81,7 +86,7 @@ public class PostService {
     }
 
     @Transactional
-    public Long deletePost(Long id, PostRequestsDto requestsDto, HttpServletRequest request) {
+    public Long deletePost(Long id, HttpServletRequest request) {
         String token = jwtUtil.resolveToken(request);
         Claims claims;
         if (token != null) {
@@ -106,8 +111,4 @@ public class PostService {
         }
     }
 
-    public PostResponseDto getpost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(()->new IllegalArgumentException("게시글이 없습니다." + id));
-        return new PostResponseDto(post);
-    }
 }

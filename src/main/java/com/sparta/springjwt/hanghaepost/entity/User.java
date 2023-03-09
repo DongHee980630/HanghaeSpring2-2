@@ -2,16 +2,12 @@ package com.sparta.springjwt.hanghaepost.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @Entity(name = "users")
-@ToString
 public class User {
 
     @Id
