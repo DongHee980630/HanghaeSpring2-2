@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -21,10 +23,21 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)   //enum 이름을 db에 저장
+    private UserRoleEnum roleEnum;
 
-    public User(String username, String password) {
+    @OneToMany(mappedBy = "user")
+    private List<Post> postList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<Comment> commentList = new ArrayList<>();
+
+
+    public User(String username, String password, UserRoleEnum roleEnum) {
         this.username = username;
         this.password = password;
+        this.roleEnum = roleEnum;
     }
 }
 

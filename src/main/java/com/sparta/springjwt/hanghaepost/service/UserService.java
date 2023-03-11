@@ -3,6 +3,7 @@ package com.sparta.springjwt.hanghaepost.service;
 import com.sparta.springjwt.hanghaepost.dto.LoginRequestDto;
 import com.sparta.springjwt.hanghaepost.dto.SignupRequestDto;
 import com.sparta.springjwt.hanghaepost.entity.User;
+import com.sparta.springjwt.hanghaepost.entity.UserRoleEnum;
 import com.sparta.springjwt.hanghaepost.jwt.JwtUtil;
 import com.sparta.springjwt.hanghaepost.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
+    private static final String ADMIN_TOKEN = "xRVklrnYxKZ0aHgTBcXukeZygoC";
+
     @Transactional
     public void signup(SignupRequestDto signupRequestDto) {
         String username  = signupRequestDto.getUsername();
@@ -27,7 +30,14 @@ public class UserService {
         if (found.isPresent()) {
             throw new IllegalArgumentException("중복된 사용자가 존재합니다.");
         }
-        User user = new User(username, password);
+        UserRoleEnum roleEnum = UserRoleEnum.USER;
+        if (signupRequestDto.isAdmin()) {
+            if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
+                throw new IllegalArgumentException("관리자 암호가 틀려 등록이 불가능합니다.");
+            }
+            roleEnum = UserRoleEnum.ADMIN;
+        }
+        User user = new User(username, password, roleEnum);
 
         userRepository.save(user);
     }
@@ -47,6 +57,6 @@ public class UserService {
             throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
         //기존 헤더에 값을 추가하는 코드
-        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername()));
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername(), user.getRoleEnum()));
     }
 }

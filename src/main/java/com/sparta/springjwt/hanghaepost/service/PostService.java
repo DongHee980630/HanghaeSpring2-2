@@ -4,6 +4,7 @@ import com.sparta.springjwt.hanghaepost.dto.PostRequestsDto;
 import com.sparta.springjwt.hanghaepost.dto.PostResponseDto;
 import com.sparta.springjwt.hanghaepost.entity.Post;
 import com.sparta.springjwt.hanghaepost.entity.User;
+import com.sparta.springjwt.hanghaepost.entity.UserRoleEnum;
 import com.sparta.springjwt.hanghaepost.jwt.JwtUtil;
 import com.sparta.springjwt.hanghaepost.repository.PostRepository;
 import com.sparta.springjwt.hanghaepost.repository.UserRepository;
@@ -23,31 +24,35 @@ public class PostService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    @Transactional
-    public PostResponseDto createPost(PostRequestsDto requestsDto, HttpServletRequest request){
-        //  Token 가져오기
+    private User findUserByToken(HttpServletRequest request){
         String token = jwtUtil.resolveToken(request);
-        //payload : 클레임을 포함한다. 즉, 클라이언트에 대한 정보가 담겨있음
         Claims claims;
         if (token != null) {
+            // Token 검증
             if (jwtUtil.validateToken(token)) {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
                 throw new IllegalArgumentException("Token Error");
             }
-            // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
+
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
-            //요청받은 DTO로 db에 저장할 객체 만들기
-            Post post = postRepository.saveAndFlush(new Post(requestsDto,user));
-
-            return new PostResponseDto(post);
+            return user;
         }else {
             throw new IllegalArgumentException("토큰없음");
         }
     }
+
+    @Transactional
+        public PostResponseDto createPost(PostRequestsDto requestsDto, HttpServletRequest request){
+            //  Token 가져오기
+            User user = findUserByToken(request);
+            //요청받은 DTO로 db에 저장할 객체 만들기
+            Post post = postRepository.saveAndFlush(new Post(requestsDto, user));
+            return new PostResponseDto(post);
+        }
     public List<PostResponseDto> getPosts() {
         return postRepository.findAllByOrderByModifiedAtDesc();
     }
@@ -59,56 +64,30 @@ public class PostService {
 
     @Transactional
     public PostResponseDto update(Long id, PostRequestsDto requestsDto, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-
-        if (token != null) {
-            // Token 검증
-            if (jwtUtil.validateToken(token)) {
-                // 토큰에서 사용자 정보 가져오기
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                throw new IllegalArgumentException("Token Error");
-            }
-
-
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
+        User user = findUserByToken(request);
+        Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
                     () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
             );
-            post.update(requestsDto);
-            return new PostResponseDto(post);
-        }else {
-            throw new IllegalArgumentException("토큰없음");
+            if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())){
+                post.update(requestsDto);
+                return new PostResponseDto(post);
+            }else {
+                throw new IllegalArgumentException("수정권한 없음");
+            }
         }
-    }
 
     @Transactional
     public Long deletePost(Long id, HttpServletRequest request) {
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-        if (token != null) {
-            // Token 검증
-            if (jwtUtil.validateToken(token)) {
-                // 토큰에서 사용자 정보 가져오기
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                throw new IllegalArgumentException("Token Error");
-            }
-
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
-                    () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
-            );
+        User user = findUserByToken(request);
+        Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
+                () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
+        );
+        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())) {
             postRepository.deleteById(id);
             return id;
-        }else {
-            throw new IllegalArgumentException("토큰없음");
+        } else {
+            throw new IllegalArgumentException("삭제 권한 없음");
         }
     }
+    }
 
-}
