@@ -35,6 +35,7 @@ public class UserService {
             if (!signupRequestDto.getAdminToken().equals(ADMIN_TOKEN)) {
                 throw new IllegalArgumentException("관리자 암호가 틀려 등록이 불가능합니다.");
             }
+            System.out.println("isAdmin.......단락");
             roleEnum = UserRoleEnum.ADMIN;
         }
         User user = new User(username, password, roleEnum);
