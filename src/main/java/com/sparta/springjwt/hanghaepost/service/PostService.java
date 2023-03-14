@@ -54,7 +54,8 @@ public class PostService {
             return new PostResponseDto(post);
         }
     public List<PostResponseDto> getPosts() {
-        return postRepository.findAllByOrderByModifiedAtDesc();
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+        return posts.stream().map(PostResponseDto::new).toList();
     }
 
     public PostResponseDto getpost(Long id) {
