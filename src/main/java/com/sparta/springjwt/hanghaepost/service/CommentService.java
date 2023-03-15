@@ -62,7 +62,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndUserId(commentId, user.getId()).orElseThrow(
                 () -> new NullPointerException("해당 댓글은 존재하지 않습니다.")
         );
-        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())){
+        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser())){
             comment.update(commentRequestDto);
             return new CommentResponseDto(comment);
         }else {
@@ -77,7 +77,7 @@ public class CommentService {
         Comment comment = commentRepository.findByIdAndUserId(commentId, user.getId()).orElseThrow(
                 () -> new NullPointerException("해당 댓글은 존재하지 않습니다.")
         );
-        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())) {
+        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser())) {
             commentRepository.deleteById(commentId);
             return commentId;
         } else {

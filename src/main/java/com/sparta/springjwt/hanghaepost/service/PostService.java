@@ -24,31 +24,9 @@ public class PostService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    private User findUserByToken(HttpServletRequest request){
-        String token = jwtUtil.resolveToken(request);
-        Claims claims;
-        if (token != null) {
-            // Token 검증
-            if (jwtUtil.validateToken(token)) {
-                // 토큰에서 사용자 정보 가져오기
-                claims = jwtUtil.getUserInfoFromToken(token);
-            } else {
-                throw new IllegalArgumentException("Token Error");
-            }
-
-            User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
-            );
-            return user;
-        }else {
-            throw new IllegalArgumentException("토큰없음");
-        }
-    }
 
     @Transactional
-        public PostResponseDto createPost(PostRequestsDto requestsDto, HttpServletRequest request){
-            //  Token 가져오기
-            User user = findUserByToken(request);
+        public PostResponseDto createPost(PostRequestsDto requestsDto, User user){
             //요청받은 DTO로 db에 저장할 객체 만들기
             Post post = postRepository.saveAndFlush(new Post(requestsDto, user));
             return new PostResponseDto(post);
@@ -64,23 +42,21 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponseDto update(Long id, PostRequestsDto requestsDto, HttpServletRequest request) {
-        User user = findUserByToken(request);
-        Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
-                    () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
-            );
-            if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())){
-                post.update(requestsDto);
-                return new PostResponseDto(post);
-            }else {
-                throw new IllegalArgumentException("수정권한 없음");
-            }
+    public PostResponseDto update(Long id, PostRequestsDto requestsDto, User user) {
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("해당 게시물은 존재하지 않습니다.")
+        );
+        if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())) {
+            post.update(requestsDto);
+            return new PostResponseDto(post);
+        } else {
+            throw new IllegalArgumentException("수정권한 없음");
         }
+    }
 
     @Transactional
-    public Long deletePost(Long id, HttpServletRequest request) {
-        User user = findUserByToken(request);
-        Post post = postRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
+    public Long deletePost(Long id, User user) {
+        Post post = postRepository.findById(id).orElseThrow(
                 () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
         );
         if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())) {

@@ -4,10 +4,12 @@ import com.sparta.springjwt.hanghaepost.dto.PostRequestsDto;
 import com.sparta.springjwt.hanghaepost.dto.PostResponseDto;
 import com.sparta.springjwt.hanghaepost.dto.ResponseDto;
 import com.sparta.springjwt.hanghaepost.entity.Post;
+import com.sparta.springjwt.hanghaepost.security.UserDetailsImpl;
 import com.sparta.springjwt.hanghaepost.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,8 +21,8 @@ public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/api/posts") public PostResponseDto createPost(@RequestBody PostRequestsDto requestsDto, HttpServletRequest request){
-        return postService.createPost(requestsDto, request);
+    @PostMapping("/api/posts") public PostResponseDto createPost(@RequestBody PostRequestsDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return postService.createPost(requestDto, userDetails.getUser());
     }
     @GetMapping("/api/posts")
     public List<PostResponseDto> getPosts(){
@@ -34,14 +36,14 @@ public class PostController {
     }
 
     @PutMapping("/api/posts/{id}")
-    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, HttpServletRequest request){
-        PostResponseDto postResponseDto = postService.update(id, requestDto, request);
+    public ResponseEntity<PostResponseDto> updatePost(@PathVariable Long id, @RequestBody PostRequestsDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        PostResponseDto postResponseDto = postService.update(id, requestDto, userDetails.getUser());
         return ResponseEntity.status(HttpStatus.OK).body(postResponseDto);
     }
 
     @DeleteMapping("/api/posts/{id}")
-    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long id, HttpServletRequest request){
-        postService.deletePost(id, request);
+    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        postService.deletePost(id, userDetails.getUser());
         return ResponseEntity.ok(new ResponseDto(HttpStatus.OK.value(), "게시글 삭제 성공"));
     }
 }

@@ -7,6 +7,7 @@ import com.sparta.springjwt.hanghaepost.entity.UserRoleEnum;
 import com.sparta.springjwt.hanghaepost.jwt.JwtUtil;
 import com.sparta.springjwt.hanghaepost.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +19,14 @@ import java.util.Optional;
 public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     private static final String ADMIN_TOKEN = "xRVklrnYxKZ0aHgTBcXukeZygoC";
 
     @Transactional
     public void signup(SignupRequestDto signupRequestDto) {
         String username  = signupRequestDto.getUsername();
-        String password = signupRequestDto.getPassword();
+        String password = passwordEncoder.encode(signupRequestDto.getPassword());
 
         Optional<User> found = userRepository.findByUsername(username);
         if (found.isPresent()) {
@@ -54,7 +56,7 @@ public class UserService {
                 () -> new IllegalArgumentException("등록된 사용자가 없습니다.")
         );
         //비밀번호 확인하는 로직
-        if(!user.getPassword().equals(password)){
+        if(!passwordEncoder.matches(password, user.getPassword())){
             throw  new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
         //기존 헤더에 값을 추가하는 코드
