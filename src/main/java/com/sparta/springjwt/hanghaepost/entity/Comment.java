@@ -21,17 +21,19 @@ public class Comment extends Timestamped{
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "POST_ID", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    @Column(nullable = true)
+    private int likeNumber = 0;
 
     public Comment(CommentRequestDto requestsDto, User user, Post post) {
         this.content = requestsDto.getContent();
         this.user = user;
-        user.getCommentList().add(this);
         this.post = post;
         post.getCommentList().add(this);
     }
@@ -39,4 +41,7 @@ public class Comment extends Timestamped{
         this.content = requestsDto.getContent();
     }
 
+    public void setLikeNumber(int likeNumber) {
+        this.likeNumber = likeNumber;
+    }
 }

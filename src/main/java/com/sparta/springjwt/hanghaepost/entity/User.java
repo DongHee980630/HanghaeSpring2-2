@@ -14,6 +14,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private  Long id;
 
     // nullable: null 허용 여부
@@ -27,11 +28,6 @@ public class User {
     @Enumerated(EnumType.STRING)   //enum 이름을 db에 저장
     private UserRoleEnum roleEnum;
 
-    @OneToMany(mappedBy = "user")
-    private List<Post> postList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "user")
-    private List<Comment> commentList = new ArrayList<>();
 
 
     public User(String username, String password, UserRoleEnum roleEnum) {

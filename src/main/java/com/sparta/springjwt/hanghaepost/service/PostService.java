@@ -8,12 +8,10 @@ import com.sparta.springjwt.hanghaepost.entity.UserRoleEnum;
 import com.sparta.springjwt.hanghaepost.jwt.JwtUtil;
 import com.sparta.springjwt.hanghaepost.repository.PostRepository;
 import com.sparta.springjwt.hanghaepost.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -57,7 +55,7 @@ public class PostService {
     @Transactional
     public Long deletePost(Long id, User user) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new NullPointerException("해당 게시물은 존재하지 않습니다.")
+                () -> new IllegalArgumentException("해당 게시물은 존재하지 않습니다.")
         );
         if (user.getRoleEnum() == UserRoleEnum.ADMIN || user.getId().equals(post.getUser().getId())) {
             postRepository.deleteById(id);

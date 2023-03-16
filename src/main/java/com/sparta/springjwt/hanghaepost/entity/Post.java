@@ -4,6 +4,8 @@ package com.sparta.springjwt.hanghaepost.entity;
 import com.sparta.springjwt.hanghaepost.dto.PostRequestsDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -25,8 +27,11 @@ public class Post extends Timestamped {
     @Column(nullable = false)
     private String contents;
 
+    @Column(nullable = true)
+    private int likeNumber = 0;
+
     @ManyToOne
-    @JoinColumn(name = "USER_ID", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "post")
@@ -41,5 +46,9 @@ public class Post extends Timestamped {
     public void update(PostRequestsDto requestsDto) {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
+    }
+
+    public void setLikeNumber(int likeNumber) {
+        this.likeNumber = likeNumber;
     }
 }

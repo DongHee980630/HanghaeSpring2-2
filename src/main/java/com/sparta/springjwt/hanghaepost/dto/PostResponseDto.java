@@ -21,6 +21,10 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private List<CommentResponseDto> commentList = new ArrayList<>();
+
+    private  int like;
+
+
     public PostResponseDto(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
@@ -28,6 +32,7 @@ public class PostResponseDto {
         this.username = post.getUser().getUsername();
         this.createdAt = post.getCreatedAt();
         this.modifiedAt = post.getModifiedAt();
+        this.like = post.getLikeNumber();
         List<Comment> comments = post.getCommentList();
         if (!comments.isEmpty()) {
             List<CommentResponseDto> commentList = new ArrayList<>();
